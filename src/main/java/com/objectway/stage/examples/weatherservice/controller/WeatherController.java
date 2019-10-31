@@ -8,11 +8,14 @@ import com.objectway.stage.examples.weatherservice.service.ForecastService;
 import com.objectway.stage.examples.weatherservice.validation.Domain;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Random;
 
 @RestController
 @Validated
@@ -20,6 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class WeatherController {
     @Autowired
     private ForecastService forecastService;
+
+    private final Random random = new Random();
+
+    @Value("${failure.rate:50}")
+    private int failureRate;
 
     @GetMapping("/forecast/{location}/week")
     @ApiOperation(value = "Gets the weekly forecast")
@@ -31,9 +39,13 @@ public class WeatherController {
                                             @ApiParam(value = "Temperature unit")
                                             @Domain(enumClass = TemperatureUnit.class)
                                             final String temperatureUnit) {
+        // Simulate random failures
+        if (random.nextInt(100) < failureRate) {
+            throw new RuntimeException("Random failure!");
+        }
+
         final WeatherWeekDTO weekForecast = new WeatherWeekDTO();
         weekForecast.setLocation(location);
-
         for (WeekDay weekday : WeekDay.values()) {
             weekForecast.getDays().put(
                 weekday.name(),
@@ -59,6 +71,11 @@ public class WeatherController {
                                              @ApiParam(value = "Temperature unit")
                                              @Domain(enumClass = TemperatureUnit.class)
                                              final String temperatureUnit) {
+        // Simulate random failures
+        if (random.nextInt(100) < failureRate) {
+            throw new RuntimeException("Random failure!");
+        }
+
         return forecastService.getForecastsForDay(location, WeekDay.valueOf(weekday), TemperatureUnit.valueOf(temperatureUnit));
     }
 }
