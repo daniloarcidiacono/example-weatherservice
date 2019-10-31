@@ -1,0 +1,9 @@
+spring:
+  main:
+    banner-mode: 'off'
+
+server:
+  port: 3200
+  servlet:
+    context-path: /weather
+
